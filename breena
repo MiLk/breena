@@ -8,7 +8,7 @@
 use warnings;
 use strict;
 use POSIX qw(strftime);
-use POE;
+use POE qw(Component::IRC Component::IRC::Plugin::Connector);
 use POE::Component::IRC;
 use Time::HiRes qw(time);
 use Config::Simple;
@@ -65,7 +65,10 @@ foreach my $plugin (@plugins_files)
 }
 
 sub bot_connect {
+  my ($kernel, $heap) = @_[KERNEL ,HEAP];
   $irc->yield(register => "all");
+  $heap->{connector} = POE::Component::IRC::Plugin::Connector->new();
+  $irc->plugin_add( 'Connector' => $heap->{connector} );
   $irc->yield(
     connect => {
       Nick     => "$conf_nick",
